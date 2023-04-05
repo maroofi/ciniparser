@@ -1,5 +1,7 @@
 # Prerequisites
 *.d
+.ycm_extra_conf.py
+test/test
 
 # Object files
 *.o
