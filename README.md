@@ -14,12 +14,12 @@ This library only supports the stable features of .ini files ([See here](https:/
 
 Here is the rules:
 
-1. Each key-value pair **must** be inside a section. So if you want to have some global options, then just define them as `[global]` section.
+1. Each key-value pair **must** be inside a section. So if you want to have some global options, then just define them inside `[global]` section.
 2. keys and sections will be all converted to lower-case characters.
-3. Whitespaces around the keys will be stripped.
+3. Whitespaces around the keys and values will be stripped.
 4. comments line starts with `;`
 5. key-values are in a form of `key = values` (spaces around both keys and values are optional)
-6. Sections define with brackets (`[sectionName]`)
+6. Sections define with brackets (`[sectionName]` or `[Section Name]` or `[section_name]`)
 7. You can not use `[` or `]` as part of a section name
 8. You can not use `=` as part of the key name.
 9. No inline comment is allowed (e.g., this is wrong `a=b  ;this is a comment`)

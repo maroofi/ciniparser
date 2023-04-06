@@ -383,12 +383,6 @@ static short int cini_is_section_name_valid(char * section_name, cini_config * c
 #ifdef DEBUG
     fprintf(stdout, "tmp: '%s', len: %d\n", tmp, _str_len(tmp));
 #endif
-    while ((ch = *tmp++) != '\0'){
-        if (!_is_al_num(ch)){
-            config->err_code = CINI_ERROR_INVALID_SECTION_NAME;
-            break;
-        }
-    }
     if (config->err_code != CINI_ERROR_SUCCESS)
         return 0;
     //successfull

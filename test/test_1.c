@@ -35,7 +35,10 @@ int main(int argc, char ** argv){
             fprintf(stdout, "    {%s}->{%s}\n", key_list[j], cini_get_value(conf, sec_arr[i], key_list[j]));
             j++;
         }
+        free(key_list);
         i++;
     }
+    cini_free(conf);
+    free(sec_arr);
     return 0;
 }
