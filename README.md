@@ -6,8 +6,9 @@ Small C code to parse .ini configuration files.
 
 ##### Why anothre .ini parser?
 
-_I found other .ini parsers very complecated with lots of unnecessary functions and initialization steps. The whole purpose of configuration file is to store some settings to have more control over the code. That's it. it's not a database or your personal diary. If you are looking for a .ini parser which can do a lot of things, you should probably look for the problem somewhere else (e.g., your code)._
+_I found other .ini parsers very complecated with lots of unnecessary functions and initialization steps. The whole purpose of configuration file is to store some settings to have more flexibility in the code. That's it. It's not a database or your personal diary. If you are looking for a .ini parser which can do a lot of things, you should probably look for the problem somewhere else (e.g., your code)._
 
+_Currently there is no .ini writer in this code. This is just a reader and parser. Writing into an ini file is just as easy as writing files in C._
 ### Parsing rules
 
 This library only supports the stable features of .ini files ([See here](https://en.wikipedia.org/wiki/INI_file#Stable_features)).
