@@ -3,6 +3,11 @@ C .INI parser (.ini config file parser)
 
 Small C code to parse .ini configuration files.
 
+
+##### Why anothre .ini parser?
+
+_I found other .ini parsers very complecated with lots of unnecessary functions and initialization steps. The whole purpose of configuration file is to store some settings to have more control over the code. That's it. it's not a database or your personal diary. If you are looking for a .ini parser which can do a lot of things, you should probably look for the problem somewhere else (e.g., your code)._
+
 ### Parsing rules
 
 This library only supports the stable features of .ini files ([See here](https://en.wikipedia.org/wiki/INI_file#Stable_features)).
@@ -17,6 +22,7 @@ Here is the rules:
 6. Sections define with brackets (`[sectionName]`)
 7. You can not use `[` or `]` as part of a section name
 8. You can not use `=` as part of the key name.
+9. No inline comment is allowed (e.g., this is wrong `a=b  ;this is a comment`)
 
 
 ### How it works
