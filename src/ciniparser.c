@@ -1,8 +1,6 @@
 #include <ciniparser.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 
 /**
@@ -16,13 +14,13 @@ char ** cini_get_all_keys(cini_config * config, char * section){
     if (tmp == NULL)
         return NULL;
     cini_kvpair *tmp_kv = NULL;
-    if (strlen(section) > 255){
+    if (_str_len(section) > 255){
         return NULL;
     }
     char new_sec[256] = {0};
     strcpy(new_sec, section);
-    for(int i=0; i< strlen(section); i++)
-        new_sec[i] = tolower(new_sec[i]);
+    for(int i=0; i< _str_len(section); i++)
+        new_sec[i] = _to_lower(new_sec[i]);
     cini_section * seclist = tmp->sections;
     while (seclist){
         if (strcmp(new_sec, seclist->section_name) == 0)
@@ -54,6 +52,7 @@ void cini_free(cini_config * config){
     }
     cini_kvpair * tmp_kv;
     cini_section * tmp_sec;
+    cini_kvpair * temp;
     while (sec){
         tmp_kv = sec->kv_list;
         for (unsigned int i=0; i< sec->num_of_properties; ++i){
@@ -63,7 +62,9 @@ void cini_free(cini_config * config){
 #endif
                 free(tmp_kv->key);
                 free(tmp_kv->value);
-                tmp_kv = tmp_kv->next;
+                temp = tmp_kv->next;
+                free(tmp_kv);
+                tmp_kv = temp;
                 continue;
             }
         }
@@ -84,12 +85,12 @@ char * cini_get_value(cini_config * conf, char * section, char * key){
     if (conf == NULL || section == NULL || key == NULL)
         return NULL;
     cini_config * tmp = conf;
-    if (strlen(section) > 256)
+    if (_str_len(section) > 256)
         return NULL;
     char new_sec[256] = {0};
     strcpy(new_sec, section);
-    for (int i=0; i< strlen(section); i++)
-        new_sec[i] = tolower(new_sec[i]);
+    for (int i=0; i< _str_len(section); i++)
+        new_sec[i] = _to_lower(new_sec[i]);
     cini_section * seclist = tmp->sections;
     while(seclist){
         if (strcmp(new_sec, seclist->section_name) == 0)
@@ -99,12 +100,12 @@ char * cini_get_value(cini_config * conf, char * section, char * key){
     if (NULL == seclist)
         return NULL;
     cini_kvpair *tmp_kv = seclist->kv_list;
-    if (strlen(key) > 255)
+    if (_str_len(key) > 255)
         return NULL;
     char new_key[256] = {0};
     strcpy(new_key, key);
-    for (unsigned int i=0; i< strlen(new_key); ++i)
-        new_key[i] = tolower(new_key[i]);
+    for (unsigned int i=0; i< _str_len(new_key); ++i)
+        new_key[i] = _to_lower(new_key[i]);
     for (unsigned int i=0; i< seclist->num_of_properties; ++i){
         if (strcmp(new_key, tmp_kv->key) == 0){
             return tmp_kv->value;
@@ -179,7 +180,7 @@ void cini_parse_from_file(char * filename, cini_config * config){
             return;
         }
         free(line);
-        if (strlen(new_line) == 0){
+        if (_str_len(new_line) == 0){
             free(new_line);
             continue;
         }
@@ -197,21 +198,21 @@ void cini_parse_from_file(char * filename, cini_config * config){
                 return;
             }
             //nice section name
-            sec_name = (char*) malloc(strlen(new_line) -2 +1);
+            sec_name = (char*) malloc(_str_len(new_line) -2 +1);
             if (!sec_name){
                 free(new_line);
                 fclose(fp);
                 config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
                 return;
             }
-            strncpy(sec_name, new_line + 1, strlen(new_line) -2);
-            sec_name[strlen(new_line) -2] = '\0';
+            strncpy(sec_name, new_line + 1, _str_len(new_line) -2);
+            sec_name[_str_len(new_line) -2] = '\0';
             cini_section * new_section = cini_create_new_section(sec_name);
+            free(sec_name);
             if (new_section == NULL){
                 config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
                 fclose(fp);
                 free(new_line);
-                free(sec_name);
                 return;
             }
             cini_add_section_to_config(config, new_section);
@@ -241,10 +242,11 @@ void cini_parse_from_file(char * filename, cini_config * config){
         }
         free(new_line);
     }
+    fclose(fp);
 }
 
 
-void cini_add_kvpair_to_section(cini_kvpair * kvpair, cini_config * config){
+static void cini_add_kvpair_to_section(cini_kvpair * kvpair, cini_config * config){
     cini_section * tmp = config->sections;
     if (tmp == NULL){
         // we still don't have section but trying to add kv-pair
@@ -269,7 +271,7 @@ void cini_add_kvpair_to_section(cini_kvpair * kvpair, cini_config * config){
 }
 
 
-cini_kvpair * cini_create_new_kvpair(char * line, char * equal_pos, cini_config * config){
+static cini_kvpair * cini_create_new_kvpair(char * line, char * equal_pos, cini_config * config){
     // error: on empty key
     // lowercase the key
     // no error for empty value
@@ -279,7 +281,7 @@ cini_kvpair * cini_create_new_kvpair(char * line, char * equal_pos, cini_config 
         config->err_code = CINI_ERROR_EMPTY_KEY;
         return NULL;
     }
-    for (;*tmp && tmp < equal_pos; tmp++){*tmp = tolower(*tmp);}
+    for (;*tmp && tmp < equal_pos; tmp++){*tmp = _to_lower(*tmp);}
     char * key = (char*) malloc(equal_pos - line + 1);
     if (!key){
         config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
@@ -296,13 +298,13 @@ cini_kvpair * cini_create_new_kvpair(char * line, char * equal_pos, cini_config 
     if (!new_key || config->err_code != CINI_ERROR_SUCCESS){
         return NULL;
     }
-    char * value = (char*) malloc(strlen(equal_pos)+1);
+    char * value = (char*) malloc(_str_len(equal_pos)+1);
     if (!value){
         free(new_key);
         config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
         return NULL;
     }
-    value[strlen(equal_pos)] = '\0';
+    value[_str_len(equal_pos)] = '\0';
     strcpy(value, equal_pos+1);
     char * new_value = cini_strip_line(value, config);
     if (!new_value || config->err_code != CINI_ERROR_SUCCESS){
@@ -325,7 +327,7 @@ cini_kvpair * cini_create_new_kvpair(char * line, char * equal_pos, cini_config 
 }
 
 
-void cini_add_section_to_config(cini_config* config, cini_section * section){
+static void cini_add_section_to_config(cini_config* config, cini_section * section){
     cini_section * tmp = config->sections;
     if (NULL == tmp){
         config->sections = section;
@@ -339,13 +341,13 @@ void cini_add_section_to_config(cini_config* config, cini_section * section){
 
 
 
-cini_section * cini_create_new_section(char * section_name){
+static cini_section * cini_create_new_section(char * section_name){
     cini_section * new_section = (cini_section *) malloc(sizeof(cini_section));
     if (!new_section)
         return NULL;
-    new_section->section_name = (char *) malloc(strlen(section_name) + 1);
+    new_section->section_name = (char *) malloc(_str_len(section_name) + 1);
     char * tmp = section_name;
-    for(; *tmp;++tmp){*tmp = tolower(*tmp);}
+    for(; *tmp;++tmp){*tmp = _to_lower(*tmp);}
     strcpy(new_section->section_name, section_name);
     new_section->num_of_properties = 0;
     new_section->kv_list = NULL;
@@ -358,31 +360,31 @@ cini_section * cini_create_new_section(char * section_name){
  * @param section_name Section name string
  * @return 1 if it's valid or 0 if it's not valid.
  */
-short int cini_is_section_name_valid(char * section_name, cini_config * config){
+static short int cini_is_section_name_valid(char * section_name, cini_config * config){
     // section name always starts with [ and ends with ]
 #ifdef DEBUG
-        fprintf(stdout, "Section name: '%s', len: %d\n", section_name, strlen(section_name));
+        fprintf(stdout, "Section name: '%s', len: %d\n", section_name, _str_len(section_name));
 #endif
-    if (section_name[0] != '[' || section_name[strlen(section_name) -1] != ']'){
+    if (section_name[0] != '[' || section_name[_str_len(section_name) -1] != ']'){
         config->err_code = CINI_ERROR_INVALID_SECTION_NAME;
         return 0;
     }
     // section name smaller than 255
-    if (strlen(section_name) > 255){
+    if (_str_len(section_name) > 255){
         config->err_code = CINI_ERROR_SECTION_NAME_TOO_LONG;
         return 0;
     }
     char name[256] = {0};
     char * tmp = name;
-    strncpy(name, section_name + 1, strlen(section_name) -2);
+    strncpy(name, section_name + 1, _str_len(section_name) -2);
     int name_invalid = 0;
     int ch;
     config->err_code = CINI_ERROR_SUCCESS;
 #ifdef DEBUG
-    fprintf(stdout, "tmp: '%s', len: %d\n", tmp, strlen(tmp));
+    fprintf(stdout, "tmp: '%s', len: %d\n", tmp, _str_len(tmp));
 #endif
     while ((ch = *tmp++) != '\0'){
-        if (!isalnum(ch)){
+        if (!_is_al_num(ch)){
             config->err_code = CINI_ERROR_INVALID_SECTION_NAME;
             break;
         }
@@ -399,7 +401,7 @@ short int cini_is_section_name_valid(char * section_name, cini_config * config){
  *
  *
  */
-char * cini_readline(FILE * fp, cini_config * config){
+static char * cini_readline(FILE * fp, cini_config * config){
     const int MAX_LINE_SIZE = 255;
     char * line = (char*) calloc(MAX_LINE_SIZE + 1, sizeof(char));
     int ch = -1;
@@ -412,7 +414,7 @@ char * cini_readline(FILE * fp, cini_config * config){
         }
         if (count % MAX_LINE_SIZE == 0){
             // we need to reallocate
-            new_memory = (char*)realloc(line, strlen(line) + MAX_LINE_SIZE);
+            new_memory = (char*)realloc(line, _str_len(line) + MAX_LINE_SIZE);
             if (new_memory == NULL){
                 config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
                 free(line);
@@ -467,7 +469,7 @@ void cini_print_error(unsigned short int err_code){
 }
 
 
-char * _cini_strip_line(char * line, cini_config * config){
+static char * _cini_strip_line(char * line, cini_config * config){
     char seq[] = " \t\n\r\x0b\x0c";  // all whitespace
     unsigned int i = 0;
     unsigned int j = 0;
@@ -488,7 +490,7 @@ char * _cini_strip_line(char * line, cini_config * config){
             break;
     }
     //now tmp is the pointer to the new string
-    char * new_str = (char *)malloc(sizeof(char) * strlen(tmp) + 1);
+    char * new_str = (char *)malloc(sizeof(char) * _str_len(tmp) + 1);
     if (NULL == new_str){
         config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
         return NULL;
@@ -502,7 +504,7 @@ char * _cini_strip_line(char * line, cini_config * config){
  * @brief Internal method to strip a line
  *
  */
-char * cini_strip_line(char * line, cini_config * config){
+static char * cini_strip_line(char * line, cini_config * config){
     //strips a line both from left and right side
     //first pass the string
     char * lstrip = _cini_strip_line(line, config);
@@ -510,7 +512,7 @@ char * cini_strip_line(char * line, cini_config * config){
         return NULL;
     }
     //reverse the string
-    size_t len = strlen(lstrip);
+    size_t len = _str_len(lstrip);
     char * reverse_str = (char *) malloc(len + 1);
     if (NULL == reverse_str){
         config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
@@ -526,7 +528,7 @@ char * cini_strip_line(char * line, cini_config * config){
     if (NULL == rstrip || config->err_code != CINI_ERROR_SUCCESS)
         return NULL;
     // reverse it again
-    len = strlen(rstrip);
+    len = _str_len(rstrip);
     reverse_str = (char *) malloc(len + 1);
     if (NULL == reverse_str){
         config->err_code = CINI_ERROR_MEMORY_ALLOCATION;
@@ -538,4 +540,20 @@ char * cini_strip_line(char * line, cini_config * config){
     reverse_str[len] = '\0';
     free(rstrip);
     return reverse_str;
+}
+
+static inline int _to_lower(int c){
+    /* to remove tolower() from ctype.h*/
+    return c>=0x41 && c<=0x5A?c+0x20:c;
+}
+
+static inline int _is_al_num(int c){
+    /* to remove isalnum() from ctype.h*/
+    return (c>=0x30 && c<=0x39) || (c >=0x41 && c<= 0x5A) || (c >=0x61 && c<=0x7a)?1:0;
+}
+
+static size_t _str_len(const char * str){
+    char * tmp = (char*)str;
+    for (;*tmp; ++tmp);
+    return tmp - str;
 }
