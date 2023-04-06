@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/**
+ * This example will list all the sections with their key-values.
+ * It shows how to iterate over the structure and print configurations.
+ * If you already know what you expect in the .ini file, it's better to 
+ * use the MACROS (example in test_2.c file).
+ */
 
 int main(int argc, char ** argv){
     if (argc != 2){

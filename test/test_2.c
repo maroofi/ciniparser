@@ -4,6 +4,11 @@
 #include <stdio.h>
 
 
+/*
+ * This example shows how to read some specific settings (key-values) 
+ * from the .ini file when we know the section and key.
+ */
+
 int main(int argc, char ** argv){
     if (argc != 2){
         fprintf(stderr, "Usage: %s <ini-file>\n", argv[0]);
