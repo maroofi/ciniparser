@@ -25,4 +25,25 @@ There are two ways to use the library.
 1. using the low level functions and structures -> see `test_1.c` in `test` directory.
 2. using high level macros -> see `test_2.c` in `test` directory.
 
+### Macro definitions
+
+* **CINI_INIT()**: Initialize the config parser module
+* **CINI_READ_CONFIG()**: Read the configuration file from the disk and parse it
+* **CINI_OK()**: Checks if everything is OK (if there is no error)
+* **CINI_PERROR()**: Prints the possible error to stdout
+* **CINI_GET_VALUE()**: Reads the value of the specified section/key
+* **CINI_FREE()**: free the memory of the config parser
+
+### Errors
+
+* **CINI_ERROR_SUCCESS**: no error
+* **CINI_ERROR_FAIL**: failed for unknown reason
+* **CINI_ERROR_MEMORY_ALLOCATION**: Memory allocation failed (malloc faild)
+* **CINI_ERROR_KVPAIR_OUT_OF_SECTION**: There is a key-value pair outside the section definition
+* **CINI_ERROR_CAN_NOT_OPEN_CONFIG_FILE**: The configuration file can not be openned
+* **CINI_ERROR_INVALID_SECTION_NAME**: Section name is invalid (probably invalid characters used)
+* **CINI_ERROR_SECTION_NAME_TOO_LONG**: Section name is too long (max is 255 characters)
+* **CINI_ERROR_INVALID_KEY_VALUE_PAIR**: Key-Value pair is invalid (there is no `=` sign)
+* **CINI_ERROR_EMPTY_KEY**: There is no key for a provided value (e.g., `=127.0.0.1`)
+
 
