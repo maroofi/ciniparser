@@ -3,6 +3,19 @@
 #include <string.h>
 
 
+/*static function for internal usage*/
+static char * cini_strip_line(char * line, cini_config * config);
+static char * _cini_strip_line(char * line, cini_config * config);
+static char * cini_readline(FILE * fp, cini_config * config);
+static short int cini_is_section_name_valid(char * section_name, cini_config * config);
+static cini_section * cini_create_new_section(char * section_name);
+static void cini_add_section_to_config(cini_config *, cini_section *);
+static cini_kvpair * cini_create_new_kvpair(char *, char *, cini_config *);
+static void cini_add_kvpair_to_section(cini_kvpair * kvpair, cini_config * config);
+static inline int _to_lower(int c);
+static size_t _str_len(const char * str);
+
+
 /**
  * @brief Returns all keys for the specified section
  *
@@ -375,10 +388,7 @@ static short int cini_is_section_name_valid(char * section_name, cini_config * c
         return 0;
     }
     char name[256] = {0};
-    char * tmp = name;
     strncpy(name, section_name + 1, _str_len(section_name) -2);
-    int name_invalid = 0;
-    int ch;
     config->err_code = CINI_ERROR_SUCCESS;
 #ifdef DEBUG
     fprintf(stdout, "tmp: '%s', len: %d\n", tmp, _str_len(tmp));
@@ -466,7 +476,6 @@ void cini_print_error(unsigned short int err_code){
 static char * _cini_strip_line(char * line, cini_config * config){
     char seq[] = " \t\n\r\x0b\x0c";  // all whitespace
     unsigned int i = 0;
-    unsigned int j = 0;
     const char * tmp = line;
     char ch;
     unsigned int found = 0;
@@ -539,11 +548,6 @@ static char * cini_strip_line(char * line, cini_config * config){
 static inline int _to_lower(int c){
     /* to remove tolower() from ctype.h*/
     return c>=0x41 && c<=0x5A?c+0x20:c;
-}
-
-static inline int _is_al_num(int c){
-    /* to remove isalnum() from ctype.h*/
-    return (c>=0x30 && c<=0x39) || (c >=0x41 && c<= 0x5A) || (c >=0x61 && c<=0x7a)?1:0;
 }
 
 static size_t _str_len(const char * str){

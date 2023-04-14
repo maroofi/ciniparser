@@ -46,20 +46,9 @@ typedef struct _cini_config cini_config;
 
 void cini_parse_from_file(char * filename, cini_config * config);
 void cini_print_error(unsigned short int err_code);
-static char * cini_strip_line(char * line, cini_config * config);
-static char * _cini_strip_line(char * line, cini_config * config);
-static char * cini_readline(FILE * fp, cini_config * config);
-static short int cini_is_section_name_valid(char * section_name, cini_config * config);
-static cini_section * cini_create_new_section(char * section_name);
-static void cini_add_section_to_config(cini_config *, cini_section *);
-static cini_kvpair * cini_create_new_kvpair(char *, char *, cini_config *);
-static void cini_add_kvpair_to_section(cini_kvpair * kvpair, cini_config * config);
 cini_config * cini_init_config(void);
 char ** cini_get_all_section_names(cini_config*);
 char ** cini_get_all_keys(cini_config * config, char * section);
 char * cini_get_value(cini_config * conf, char * section, char * key);
 void cini_free(cini_config * config);
-static inline int _to_lower(int c);
-static inline int _is_al_num(int c);
-static size_t _str_len(const char * str);
 #endif
